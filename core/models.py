@@ -1,12 +1,13 @@
-from django.db import models
 from django.contrib.auth.models import User as DjangoUser
-from django.core.validators import MinValueValidator
-from django.utils import timezone
 from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator
+from django.db import models
+from django.utils import timezone
+
 
 # Create your models here.
 class User(models.Model):
-    user = models.OneToOneField(DjangoUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(DjangoUser, on_delete=models.CASCADE, null=True, blank=True)
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
