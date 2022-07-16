@@ -274,32 +274,6 @@ Refresh token is valid for 100 days.
 | **406 Not Acceptable**      | If field fails validation. |
 | **201 Created** | Bid posted Succefully. |
 
-## Run Locally Using Docker
-
-Clone the project
-
-```bash
-  git clone https://github.com/henishpatel9045/sellerapp
-```
-
-Go to the project directory
-
-```bash
-  cd sellerapp
-```
-
-Build Image
-
-```bash
-  docker build --tag sellerapp-django .
-```
-
-Build Image
-
-```bash
-  docker run --publish 8000:8000 sellerapp-django
-```
-
 
 ## Run Locally
 
