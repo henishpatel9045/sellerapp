@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser, Group
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
+from django.shortcuts import get_object_or_404
+from django.http.response import Http404
 from django.utils import timezone
-
 
 # Create your models here.
 class User(models.Model):
@@ -21,12 +23,12 @@ class User(models.Model):
         return self.user.get_full_name()
     
     # -------------------------SYNC THE COMMON FIELDS BETWEEN USER CLASSES-----------------------------
-    def save(self):
+    def save(self, *args, **kwargs):
         user = get_user_model().objects.get(id=self.user.id)
         user.first_name = self.first_name
         user.last_name = self.last_name
         user.save()
-        return super().save()
+        return super().save(*args, **kwargs)
     
     def __str__(self):
         return self.full_name()
@@ -97,3 +99,29 @@ class Bidding(models.Model):
     class Meta:
         ordering = ['auction', '-date_created']
         
+        
+######################## CHANGING DEFAULT AUTH USER MODEL FOR DJANGO ############################
+class BaseUser(AbstractUser):
+    def save(self, *args, **kwargs):
+        
+        # -------------------------------USING TRANSACTION TO MAKE TWO PROCESS
+        #                                 CREATION OF BASEUSER AND USER IN SELLERAPP.CORE
+        #                                 ATOMIC I.E. WHOLE PROCESS WILL ROLLBACK IF SOMETHING
+        #                                 GOES WRONG EITHER BOTH MODEL WILL SAVE IN DATABASE 
+        #                                 OR NONE OF THEM SAVE IN DATABASE---------------------------------
+        
+        with transaction.atomic():
+            try:
+                admin_group = get_object_or_404(Group, name="administrator")
+                local_group = get_object_or_404(Group, name="buyer")
+                if self.is_superuser and admin_group:
+                    self.groups.add(admin_group)
+                else:
+                    self.groups.add(local_group)
+            except Http404:
+                pass
+            
+            super().save(*args, **kwargs)
+            
+            if not self.is_superuser:
+                models.User.objects.create(user=self.pk, first_name=self.first_name, last_name=self.last_name)
