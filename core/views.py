@@ -1,7 +1,7 @@
 from decimal import Decimal
 
-from django.utils import timezone
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin, RetrieveModelMixin,
@@ -28,6 +28,9 @@ class UserViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, Gener
             res = {"username": user.username, 'first_name': user.first_name, 'last_name': user.last_name, 'email': user.email, 'response': {"message": "You are Administrator, please login to dashboard to update your profile.", "direction": "Admin user can't bid on auction he/she needs to create seperate user account to participate in bidding."}}
             return Response(res, status=status.HTTP_200_OK)
         return super().list(request, *args, **kwargs)
+    
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
     
     serializer_class = serializers.UserSerializer
 

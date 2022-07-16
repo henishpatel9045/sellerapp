@@ -1,12 +1,12 @@
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser, Group
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
-from django.shortcuts import get_object_or_404
 from django.http.response import Http404
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
+
 
 # Create your models here.
 class User(models.Model):
@@ -19,16 +19,13 @@ class User(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
     
+    def save(self, *args, **kwargs):
+        self.first_name = self.user.first_name
+        self.last_name = self.user.last_name
+        return super().save(*args, **kwargs)
+    
     def full_name(self):
         return self.user.get_full_name()
-    
-    # -------------------------SYNC THE COMMON FIELDS BETWEEN USER CLASSES-----------------------------
-    def save(self, *args, **kwargs):
-        user = get_user_model().objects.get(id=self.user.id)
-        user.first_name = self.first_name
-        user.last_name = self.last_name
-        user.save()
-        return super().save(*args, **kwargs)
     
     def __str__(self):
         return self.full_name()
@@ -101,7 +98,9 @@ class Bidding(models.Model):
         
         
 ######################## CHANGING DEFAULT AUTH USER MODEL FOR DJANGO ############################
-class BaseUser(AbstractUser):
+class BaseUser(AbstractUser):    
+    created = models.BooleanField(default=False)
+    
     def save(self, *args, **kwargs):
         
         # -------------------------------USING TRANSACTION TO MAKE TWO PROCESS
@@ -109,19 +108,29 @@ class BaseUser(AbstractUser):
         #                                 ATOMIC I.E. WHOLE PROCESS WILL ROLLBACK IF SOMETHING
         #                                 GOES WRONG EITHER BOTH MODEL WILL SAVE IN DATABASE 
         #                                 OR NONE OF THEM SAVE IN DATABASE---------------------------------
-        
-        with transaction.atomic():
-            try:
-                admin_group = get_object_or_404(Group, name="administrator")
-                local_group = get_object_or_404(Group, name="buyer")
-                if self.is_superuser and admin_group:
-                    self.groups.add(admin_group)
-                else:
-                    self.groups.add(local_group)
-            except Http404:
-                pass
-            
+    
+        if not self.created:    
+            with transaction.atomic():
+                try:
+                    admin_group = get_object_or_404(Group, name="administrator")
+                    local_group = get_object_or_404(Group, name="buyer")
+                    if self.is_superuser and admin_group:
+                        self.groups.add(admin_group)
+                    else:
+                        self.groups.add(local_group)
+                except Http404:
+                    pass
+                self.is_staff = True
+                self.created = True
+                self.set_password(self.password)
+                self.user_permissions.add(self.get_group_permissions())
+                super().save(*args, **kwargs)   
+                
+                if not self.is_superuser:
+                    User.objects.create(user_id=self.pk)
+
+        else:
             super().save(*args, **kwargs)
-            
-            if not self.is_superuser:
-                models.User.objects.create(user=self.pk, first_name=self.first_name, last_name=self.last_name)
+        
+    class Meta:
+        verbose_name = "DjangoUser"

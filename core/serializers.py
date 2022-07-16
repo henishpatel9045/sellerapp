@@ -7,7 +7,7 @@ from . import models
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
-        fields = ["first_name", "last_name", "total_bids", "auction_win", "phone_number", "country", "state", "date_created", "last_updated"]
+        fields = ["id", "first_name", "last_name", "total_bids", "auction_win", "phone_number", "country", "state", "date_created", "last_updated"]
         
     total_bids = serializers.SerializerMethodField()
     def get_total_bids(self, obj):

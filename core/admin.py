@@ -1,4 +1,6 @@
 from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth import get_user_model
 from django.utils import timezone
 
 from . import models
@@ -17,7 +19,7 @@ class BidInline(admin.TabularInline):
 @admin.register(models.User)
 class UserAdmin(admin.ModelAdmin):
     list_display = ["user", "full_name", "last_updated"]
-    inlines = [BidInline]
+    # inlines = [BidInline]
     search_fields = ['full_name']
     
     # ----------------------------SHOWING ONLY THEIR DATA TO NON ADMINISTRATIVE USERS---------------------------
@@ -67,3 +69,11 @@ class BiddingAdmin(admin.ModelAdmin):
         if request.user.is_superuser:
             return qs
         return qs.filter(user__user=request.user.id)
+
+
+
+################################## BASE USER MODEL ######################################
+
+# @admin.register(get_user_model())
+# class BaseUserAdmin(UserAdmin):
+#     list_display = ['id', 'username', 'first_name', 'last_name', 'last_login']  
