@@ -309,4 +309,4 @@ Start Server
 
 ## Application Flow
 ![Application flow](./documentation/flow.svg)
-<img src="./documentation/flow.svg" height="500px">
+<img src="./documentation/flow.svg" >
