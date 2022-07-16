@@ -307,6 +307,6 @@ Start Server
   py manage.py runserver
 ```
 
-
+## Application Flow
 ![Application flow](./documentation/flow.svg)
-<img src="./documentation/flow.svg">
+<img src="./documentation/flow.svg" height="500px">
