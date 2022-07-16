@@ -83,14 +83,6 @@ class Bidding(models.Model):
     #                                 BID AMOUNT > STARTING PRICE 
     #                                 AUCTION MUST BE ACTIVE TO MAKE A BID----------------------------------
     
-    def clean(self):
-        if self.auction.starting_price >= self.bid_amount:
-            raise ValidationError(f"Bid amount can't be less than starting price {self.auction.starting_price}.")
-        elif self.auction.start_time > timezone.now():
-            raise ValidationError("Bidding are not start for this item yet.")
-        elif self.auction.end_time < timezone.now():
-            raise ValidationError("Bidding for this item had stopped.")
-    
     class Meta:
         ordering = ['auction', '-date_created']
         
