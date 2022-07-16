@@ -1,10 +1,7 @@
 from django.conf import settings
-from django.contrib.auth.models import AbstractUser, Group
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db import models, transaction
-from django.http.response import Http404
-from django.shortcuts import get_object_or_404
+from django.db import models
 from django.utils import timezone
 
 
@@ -96,41 +93,3 @@ class Bidding(models.Model):
     class Meta:
         ordering = ['auction', '-date_created']
         
-        
-######################## CHANGING DEFAULT AUTH USER MODEL FOR DJANGO ############################
-class BaseUser(AbstractUser):    
-    created = models.BooleanField(default=False)
-    
-    def save(self, *args, **kwargs):
-        
-        # -------------------------------USING TRANSACTION TO MAKE TWO PROCESS
-        #                                 CREATION OF BASEUSER AND USER IN SELLERAPP.CORE
-        #                                 ATOMIC I.E. WHOLE PROCESS WILL ROLLBACK IF SOMETHING
-        #                                 GOES WRONG EITHER BOTH MODEL WILL SAVE IN DATABASE 
-        #                                 OR NONE OF THEM SAVE IN DATABASE---------------------------------
-    
-        if not self.created:    
-            with transaction.atomic():
-                try:
-                    admin_group = get_object_or_404(Group, name="administrator")
-                    local_group = get_object_or_404(Group, name="buyer")
-                    if self.is_superuser and admin_group:
-                        self.groups.add(admin_group)
-                    else:
-                        self.groups.add(local_group)
-                except Http404:
-                    pass
-                self.is_staff = True
-                self.created = True
-                self.set_password(self.password)
-                self.user_permissions.add(self.get_group_permissions())
-                super().save(*args, **kwargs)   
-                
-                if not self.is_superuser:
-                    User.objects.create(user_id=self.pk)
-
-        else:
-            super().save(*args, **kwargs)
-        
-    class Meta:
-        verbose_name = "DjangoUser"

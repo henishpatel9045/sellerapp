@@ -1,4 +1,9 @@
 from django.core.exceptions import ValidationError
+from django.db import transaction
+from django.utils import timezone
+from djoser.serializers import \
+    UserCreateSerializer as DjoserUserCreateSerializer
+from djoser.serializers import UserSerializer as DjoserUserSerializer
 from rest_framework import serializers
 
 from . import models
@@ -35,8 +40,21 @@ class BiddingSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Bidding
         fields = ["id", "user", "auction", "bid_amount"]
-    
+        
+
+#################################### DJOSER CUSTOM SERIALIZERS ######################################
+
+class UserCreateSerializer(DjoserUserCreateSerializer):    
     def create(self, validated_data):
-        if validated_data['bid_amount'] < models.Auction.objects.filter(id=validated_data['auction'].id).first().starting_price:
-            raise ValidationError("Bid amount must be greater than starting price for item.")
+        validated_data['is_staff'] = True
         return super().create(validated_data)
+    
+    def perform_create(self, validated_data):
+        with transaction.atomic():
+            user = super().perform_create(validated_data)
+            models.User.objects.create(user_id=user.pk)
+        return user
+        
+class DjangoUserSerializer(DjoserUserSerializer):
+    class Meta(DjoserUserSerializer.Meta):
+        fields = ['id', 'username', 'email', 'first_name', 'last_name']
