@@ -1,9 +1,9 @@
 # Seller App
 
-### It is browsable api made using django rest framework written in python language. It acts as a backend for application implementing live auction bidding features.
-### It has power of django which makes it faster, scallable and secure.
-### It is written in class based modal which makes understanding it's code easy and speedup the debugging process.
-### It uses JWT (JSON WEB TOKEN) for verifying users.
+* It is browsable api made using django rest framework written in python language. It acts as a backend for application implementing live auction bidding features.
+* It has power of django which makes it faster, scallable and secure.
+* It is written in class based modal which makes understanding it's code easy and speedup the debugging process.
+* It uses JWT (JSON WEB TOKEN) for verifying users.
 
 
 ## 🛠 Tools Used
