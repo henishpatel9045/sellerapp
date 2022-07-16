@@ -39,8 +39,8 @@ MIDDLEWARE = [
 ]
 
 if DEBUG:
-    INSTALLED_APPS +=   "debug_toolbar"
-    MIDDLEWARE += "debug_toolbar.middleware.DebugToolbarMiddleware"
+    INSTALLED_APPS.append("debug_toolbar")
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -107,6 +107,9 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+#################### EXTRA CONFIGS #####################
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
