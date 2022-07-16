@@ -19,16 +19,8 @@ class UserAdmin(admin.ModelAdmin):
     list_display = ["user", "full_name", "last_updated"]
     inlines = [BidInline]
     search_fields = ['full_name']
-    
-    # ----------------------------SHOWING ONLY THEIR DATA TO NON ADMINISTRATIVE USERS---------------------------
-    
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        print(request.user)
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(user=request.user.id)
 
+    
 # ---------------------------AUCTION ADMIN------------------------------
 
 @admin.register(models.Auction)
@@ -45,13 +37,6 @@ class AuctionAdmin(admin.ModelAdmin):
             return "YES"
         return "NO"
     
-    # ----------------------------SHOWING ONLY ACTIVE AUCTIONS TO NON ADMINISTATIVE USERS---------------------------
-    
-    def get_queryset(self, request):
-        qs = super().get_queryset(request)
-        if request.user.is_superuser:
-            return qs    
-        return qs.filter(start_time__lt=timezone.now(), end_time__gt=timezone.now())
     
 # ---------------------------BIDDING ADMIN------------------------------
     
@@ -60,11 +45,3 @@ class BiddingAdmin(admin.ModelAdmin):
     list_display = ["id", "auction", "user", "bid_amount", "date_created"]
     readonly_fields = ["has_won"]
     
-    # ----------------------------SHOWING ONLY BIDS MADE BY USER TO NON ADMINISTATIVE USERS---------------------------
-    
-    def get_queryset(self, request):
-        qs = super().get_queryset(request).prefetch_related("user__user")
-        if request.user.is_superuser:
-            return qs
-        return qs.filter(user__user=request.user.id)
-

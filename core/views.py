@@ -13,7 +13,7 @@ from . import models, serializers
 
 
     ################################ GET, DELETE, PUT, PATCH ######################################
-class UserViewSet(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet, ListModelMixin):
+class UserViewSet(GenericViewSet, ListModelMixin):
     def get_queryset(self):
         qs = models.User.objects.all()
         user = self.request.user
@@ -55,6 +55,11 @@ class BiddingViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, Gener
     
     # --------------------------HANDLING EXCEPTION FOR BID > STARTING PRICE
     #                           AND ONLY ACTIVE AUCTION RETURNED FOR BUYERS----------------------------------
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({"user": self.request.user.pk, 'auction': self.kwargs['auction_pk']})
+        return context
     
     def create(self, request, *args, **kwargs):
         bid = Decimal(request.data['bid_amount'])

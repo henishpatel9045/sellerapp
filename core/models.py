@@ -7,9 +7,9 @@ from django.utils import timezone
 
 # Create your models here.
 class User(models.Model):
-    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
-    first_name = models.CharField(max_length=50, default=" ")
-    last_name = models.CharField(max_length=50, default=" ")
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, primary_key=True)
+    first_name = models.CharField(max_length=50, null=True, blank=True)
+    last_name = models.CharField(max_length=50, null=True, blank=True)
     phone_number = models.CharField(max_length=20, null=True, blank=True)
     country = models.CharField(max_length=50, null=True, blank=True)
     state = models.CharField(max_length=50, null=True, blank=True)
@@ -25,7 +25,7 @@ class User(models.Model):
         return self.user.get_full_name()
     
     def __str__(self):
-        return self.full_name()
+        return self.user.username
     
     class Meta:
         ordering = ['-date_created']
@@ -51,8 +51,9 @@ class Auction(models.Model):
         if not self.updated and timezone.now() >= self.end_time:
             bidders = Bidding.objects.filter(auction=self.id).order_by("-bid_amount", "-date_created").values().first()
             if bidders:
-                a = Auction.objects.get(id=self.id)
-                a.user_won = User.objects.get(id=bidders["user_id"])
+                a = Auction.objects.filter(pk=self.id).first()
+                a.user_won = User.objects.filter(pk=bidders["user_id"]).first()
+                print(User.objects.get(pk=bidders["user_id"]).username)
                 a.final_bid_price = bidders["bid_amount"]
                 a.updated = True
                 a.save()
