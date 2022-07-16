@@ -263,8 +263,6 @@ Refresh token is valid for 100 days.
 | **406 Not Acceptable**      | If field fails validation. |
 | **201 Created** | Bid posted Succefully. |
 
-
-
 ## Run Locally
 
 Clone the project
@@ -310,3 +308,5 @@ Start Server
 ```
 
 
+![Application flow](./documentation/flow.svg)
+<img src="./documentation/flow.svg">
