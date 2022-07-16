@@ -1,3 +1,14 @@
+# Seller App
+
+### It is browsable api made using django rest framework written in python language. It acts as a backend for application implementing live auction bidding features.
+### It has power of django which makes it faster, scallable and secure.
+### It is written in class based modal which makes understanding it's code easy and speedup the debugging process.
+### It uses JWT (JSON WEB TOKEN) for verifying users.
+
+
+## 🛠 Tools Used
+Python, Django, Django-Rest-Framework, Djoser, drf-nestedrouters
+
 
 ## API Reference
 
@@ -310,3 +321,16 @@ Start Server
 ## Application Flow
 ![Application flow](./documentation/flow.svg)
 <img src="./documentation/flow.svg" >
+
+
+
+## Feedback
+
+If you have any feedback, please reach out to us at ompatel9045@gmail.com
+
+
+## Authors
+
+- [@henishpatel9045](https://www.github.com/henishpatel9045)
+
+
