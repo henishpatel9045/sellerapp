@@ -10,6 +10,10 @@
 Python, Django, Django-Rest-Framework, Djoser, drf-nestedrouters
 
 
+## Deployment
+   [Go to website](https://sellerappbackend.pythonanywhere.com/)
+
+
 ## API Reference
 
 ### 1. Register New User
