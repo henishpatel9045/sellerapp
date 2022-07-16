@@ -1,7 +1,7 @@
 
 ## API Reference
 
-### Register New User
+### 1. Register New User
 
 ```http
     POST /auth/users
@@ -32,7 +32,7 @@
 | **400 Bad Request**      | One or more validation fail. |
 | **201 Created** | New User created Succefully. |
 
-### Update Existing User
+### 2. Update Existing User
 
 ```http
   PUT /auth/users/${id}
@@ -65,7 +65,7 @@
 | **401 Unauthorised**      | If token is expired or not added to access-headers. |
 | **200 OK** | User Update Successfully. |
 
-### Get Token
+### 3. Get Token
 
 ```http
   POST /auth/jwt/create
@@ -102,7 +102,7 @@ Refresh token is valid for 100 days.
 | **200 OK** | User Update Successfully. |
 
 
-### Refresh Token
+### 4. Refresh Token
 
 ```http
   POST /auth/jwt/refresh
@@ -132,7 +132,7 @@ Refresh token is valid for 100 days.
 | **200 OK** | User Update Successfully. |
 
 
-### Verify Access Token
+### 5. Verify Access Token
 
 ```http
   POST /auth/jwt/create
@@ -160,7 +160,7 @@ Refresh token is valid for 100 days.
 
 
 
-### Get Current User
+### 6. Get Current User
 
 ```http
     GET /me
@@ -192,7 +192,7 @@ Refresh token is valid for 100 days.
 | **400 Bad Request**      | If token is expired or not presenr in access-headers. |
 | **200 OK** | Succefull |
 
-### Get Auctions List
+### 7. Get Auctions List
 
 ```http
     GET /auctions
@@ -221,7 +221,7 @@ Refresh token is valid for 100 days.
 | :-------- | :------- |
 | **200 OK** | Succefull |
 
-### Make Bid to auction
+### 8. Make Bid to auction
 
 ```http
   POST /auctions/${auction_id}/bid/
