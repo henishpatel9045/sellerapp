@@ -265,3 +265,48 @@ Refresh token is valid for 100 days.
 
 
 
+## Run Locally
+
+Clone the project
+
+```bash
+  git clone https://github.com/henishpatel9045/sellerapp
+```
+
+Go to the project directory
+
+```bash
+  cd sellerapp
+```
+
+Install dependencies
+
+```bash
+  pip install -r req.txt
+```
+
+For Linux/MacOS
+```bash
+  pip3 install -r req.txt
+```
+
+Make Migrations
+
+```bash
+  py manage.py makemigrations
+  py manage.py migrate
+```
+
+Create Superuser
+
+```bash
+  py manage.py createsuperuser
+```
+
+Start Server
+
+```bash
+  py manage.py runserver
+```
+
+
