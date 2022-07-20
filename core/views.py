@@ -34,7 +34,7 @@ class UserViewSet(GenericViewSet, ListModelMixin):
     serializer_class = serializers.UserSerializer
 
     ################################ GET #################################
-class AuctionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
+class AuctionViewSet(ListModelMixin, RetrieveModelMixin, CreateModelMixin, UpdateModelMixin, GenericViewSet):
     
     # ---------------------------PROTECTING AUCTION DATA FROM NON-ADMINISTRATOR----------------------------------
     
@@ -42,6 +42,16 @@ class AuctionViewSet(ListModelMixin, RetrieveModelMixin, GenericViewSet):
         if self.request.user.is_superuser:
             return models.Auction.objects.all()
         return models.Auction.objects.filter(start_time__lt=timezone.now(), end_time__gt=timezone.now())
+    
+    def update(self, request, *args, **kwargs):
+        if (self.request.user.is_superuser):
+            return super().update(request, *args, **kwargs)
+        return Response({"error": "Only admin can update auction."}, status=status.HTTP_401_UNAUTHORIZED)
+    
+    def create(self, request, *args, **kwargs):
+        if (self.request.user.is_superuser):
+            return super().create(request, *args, **kwargs)
+        return Response({"error": "Only admin can add auction."}, status=status.HTTP_401_UNAUTHORIZED)
     
     serializer_class = serializers.AuctionSerializer
     
@@ -62,23 +72,25 @@ class BiddingViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, Gener
         return context
     
     def create(self, request, *args, **kwargs):
-        bid = Decimal(request.data['bid_amount'])
-        auction = models.Auction.objects.filter(id=request.data['auction']).first()
-        
-        if bid < auction.starting_price:
-            return Response({
-                "error": "Bid amount must be greater than starting price of item."
-            }, status=status.HTTP_406_NOT_ACCEPTABLE)
-        elif auction.start_time > timezone.now():
-            return Response({
-                "error": "Bid for this item is not started yet."
-            }, status=status.HTTP_401_UNAUTHORIZED)
-        elif auction.end_time < timezone.now():
-            return Response({
-                "error": "Bid for this item is stopped."
-            }, status=status.HTTP_401_UNAUTHORIZED)
-        
-        return super().create(request, *args, **kwargs)
+        if (self.request.user and not self.request.user.is_superuser):    
+            bid = Decimal(request.data['bid_amount'])
+            auction = models.Auction.objects.filter(id=request.data['auction']).first()
+            
+            if bid < auction.starting_price:
+                return Response({
+                    "error": "Bid amount must be greater than starting price of item."
+                }, status=status.HTTP_406_NOT_ACCEPTABLE)
+            elif auction.start_time > timezone.now():
+                return Response({
+                    "error": "Bid for this item is not started yet."
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            elif auction.end_time < timezone.now():
+                return Response({
+                    "error": "Bid for this item is stopped."
+                }, status=status.HTTP_401_UNAUTHORIZED)
+            
+            return super().create(request, *args, **kwargs)
+        return Response({"error": "No user found."}, status=status.HTTP_401_UNAUTHORIZED)
     
     serializer_class = serializers.BiddingSerializer
 

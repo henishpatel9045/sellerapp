@@ -29,7 +29,7 @@ class UserSerializer(serializers.ModelSerializer):
 class AuctionSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Auction
-        fields = ["id", "title", "starting_price", "start_time", "end_time", "total_bids", "user_won", "final_bid_price"]
+        fields = ["id", "title", "starting_price", "start_time", "end_time", "total_bids", "current_bidder", "current_bid_price"]
         
     total_bids = serializers.SerializerMethodField()
     def get_total_bids(self, obj):

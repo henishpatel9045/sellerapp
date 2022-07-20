@@ -1,7 +1,7 @@
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 
 
@@ -33,34 +33,35 @@ class User(models.Model):
 
 class Auction(models.Model):
     title = models.CharField(max_length=150)
-    starting_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.0, "Price must be greater than 0.")])
+    starting_price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0.0, "Price must be greater than 0.")], default=0)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-    user_won = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name="Buyer")
-    final_bid_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    updated = models.BooleanField(default=False)
+    current_bidder = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True, related_name="Buyer")
+    current_bid_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0)
+    # updated = models.BooleanField(default=False)
     date_created = models.DateTimeField(auto_now_add=True)
+    
     
     # -----------------------------------FINDING WINNER OF AUCTION ONLY AFTER
     #                                   REACHING TIME LIMIT I.E. END TIME-----------------------------------------
     
-    def has_ended(self):
+    # def has_ended(self):
         
-        #---------------------USING BOOLEAN FIELD UPDATED TO PREVENT UNNECESSARY UPDATE QUERIES SEND TO DATABASE DECREASING 5 QUERIES PER REQUEST-------------------
+    #     #---------------------USING BOOLEAN FIELD UPDATED TO PREVENT UNNECESSARY UPDATE QUERIES SEND TO DATABASE DECREASING 5 QUERIES PER REQUEST-------------------
         
-        if not self.updated and timezone.now() >= self.end_time:
-            bidders = Bidding.objects.filter(auction=self.id).order_by("-bid_amount", "-date_created").values().first()
-            if bidders:
-                a = Auction.objects.filter(pk=self.id).first()
-                a.user_won = User.objects.filter(pk=bidders["user_id"]).first()
-                print(User.objects.get(pk=bidders["user_id"]).username)
-                a.final_bid_price = bidders["bid_amount"]
-                a.updated = True
-                a.save()
-            return "YES"
-        elif self.updated:
-            return "YES"
-        return "NO"
+    #     if not self.updated and timezone.now() >= self.end_time:
+    #         bidders = Bidding.objects.filter(auction=self.id).order_by("-bid_amount", "-date_created").values().first()
+    #         if bidders:
+    #             a = Auction.objects.filter(pk=self.id).first()
+    #             a.user_won = User.objects.filter(pk=bidders["user_id"]).first()
+    #             print(User.objects.get(pk=bidders["user_id"]).username)
+    #             a.final_bid_price = bidders["bid_amount"]
+    #             a.updated = True
+    #             a.save()
+    #         return "YES"
+    #     elif self.updated:
+    #         return "YES"
+    #     return "NO"
     
     def __str__(self):
         return self.title
@@ -78,6 +79,15 @@ class Bidding(models.Model):
     
     def __str__(self):
         return f"{self.user}-{self.auction}"
+    
+    
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            auction = Auction.objects.get(pk=self.auction.pk)
+            if(self.bid_amount > auction.current_bid_price):
+                auction.current_bid_price = self.bid_amount
+                auction.current_bidder = self.user
+            return super().save(*args, **kwargs)
     
     # ---------------------------------HANDLING ANOMALIES FOR PREDICATES 
     #                                 BID AMOUNT > STARTING PRICE 

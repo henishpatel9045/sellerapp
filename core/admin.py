@@ -25,11 +25,10 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(models.Auction)
 class AuctionAdmin(admin.ModelAdmin):
-    list_display = ["title", "starting_price", "is_active", "has_ended"]
+    list_display = ["title", "starting_price", "is_active"]
     inlines = [BidInline]
     search_fields = ["title"]
-    readonly_fields = ["user_won", "final_bid_price"]
-    exclude = ['updated']
+    readonly_fields = ["current_bidder", "current_bid_price"]
         
     def is_active(self, obj):
         flag = timezone.now() >= obj.start_time and timezone.now() <= obj.end_time
