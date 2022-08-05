@@ -4,6 +4,5 @@ jobs:
   print-hello-word:
     runs-on: ubuntu-latest
     steps:
-      run: echo "Hello world!!!"
-      run: echo "This is demo action."
-      
+      - run: echo "Hello world!!!"
+      - run: echo "This is demo action."
