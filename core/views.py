@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
@@ -89,7 +90,18 @@ class BiddingViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, Gener
                     "error": "Bid for this item is stopped."
                 }, status=status.HTTP_401_UNAUTHORIZED)
             
-            return super().create(request, *args, **kwargs)
+            if bid <= auction.current_bid_price:
+                return Response({
+                    "error": f"Bid amount must be greater than current bid price {auction.current_bid_price}."
+                }, status=status.HTTP_406_NOT_ACCEPTABLE)
+            
+            with transaction.atomic():
+                res = super().create(request, *args, **kwargs)
+                auction.current_bidder = models.User.objects.get(user=self.request.user) 
+                auction.current_bid_price = bid
+                auction.save()
+                return res
+                
         return Response({"error": "No user found."}, status=status.HTTP_401_UNAUTHORIZED)
     
     serializer_class = serializers.BiddingSerializer
